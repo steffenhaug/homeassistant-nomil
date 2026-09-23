@@ -1,4 +1,4 @@
-"""The NOMIL waste collection integration."""
+"""NOMIL waste collection integration."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ PLATFORMS = [Platform.CALENDAR, Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up NOMIL from a config entry."""
+    """Set up from a config entry."""
     client = NomilApiClient(async_get_clientsession(hass))
     coordinator = NomilCoordinator(hass, client, entry.data[CONF_EIENDOM_ID])
     await coordinator.async_config_entry_first_refresh()

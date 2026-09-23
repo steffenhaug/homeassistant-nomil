@@ -1,4 +1,4 @@
-"""Config flow for NOMIL: address lookup or direct property id."""
+"""Config flow: find your property by address or by id."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ def _title(match: dict) -> str:
 
 
 class NomilConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Guided setup: pick a property by address, or enter its id."""
+    """Guided setup for one property."""
 
     VERSION = 1
 
@@ -50,7 +50,7 @@ class NomilConfigFlow(ConfigFlow, domain=DOMAIN):
             except NomilApiError:
                 errors["base"] = "cannot_connect"
             else:
-                # De-duplicate by property id so the dropdown values are unique.
+                # dedupe by id so dropdown values are unique
                 seen: set[str] = set()
                 self._matches = [
                     m for m in matches

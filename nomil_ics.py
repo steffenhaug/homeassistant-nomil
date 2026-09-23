@@ -1,22 +1,8 @@
 #!/usr/bin/env python3
-"""Generate an iCalendar (.ics) feed of NOMIL waste collection dates.
+"""Dump NOMIL bin collection dates to an .ics file. Stdlib only."""
 
-NOMIL (Nordfjord Miljøverk IKS) has no public calendar export. Its "Tømmeplan"
-app talks to a Norconsult Digital backend; this script uses that same API.
+from __future__ import annotations
 
-Examples
---------
-  # Find your property id from an address:
-  python3 nomil_ics.py --search "Sjøgata 103"
-
-  # Write an .ics for an address (auto-resolves the property):
-  python3 nomil_ics.py --address "Sjøgata 103" --out nomil.ics
-
-  # Or for a known property id:
-  python3 nomil_ics.py --id 368ad825-6fc6-4bc5-aa6e-de88b59c00c6 --out nomil.ics
-
-No third-party dependencies (standard library only).
-"""
 import argparse
 import datetime
 import json
@@ -28,9 +14,8 @@ from html import unescape
 API_BASE = "https://tommeplan.nomil.no:9000/api/"
 APPLIKASJONS_ID = "380b0118-95ba-4c57-b53c-2f79c3922d65"
 OPPDRAGSGIVER_ID = "100"
-# Honest, self-identifying User-Agent. Clearly marked unofficial so it is not
-# impersonating the real app. Add a contact if you like, e.g.
-#   "nomil-ha/1.0 (unofficial NoMil Tommeplan client; +https://github.com/you/nomil)"
+
+# UA that identifies this as an unofficial client, not the real app
 USER_AGENT = "nomil-ha/1.0 (unofficial NoMil Tommeplan client for Home Assistant)"
 
 
@@ -73,9 +58,7 @@ def resolve_id(token: str, address: str, kommune: str | None) -> str:
     if not chosen:
         sys.exit(f"No property found for address {address!r}.")
     if len(chosen) > 1:
-        sys.stderr.write(
-            "Multiple properties matched; using the first. Candidates:\n"
-        )
+        sys.stderr.write("Multiple properties matched; using the first. Candidates:\n")
         for p in chosen:
             sys.stderr.write(f"  {p['id']}  {p.get('adresse','')}, {p.get('kommune','')}\n")
     return chosen[0]["id"]
@@ -93,7 +76,7 @@ def fetch_pickups(token: str, eiendom_id: str, days_back: int, days_ahead: int) 
 
 
 def build_ics(pickups: list, cal_name: str) -> str:
-    # Group fractions collected on the same day into one all-day event.
+    # group same-day waste types into one all-day event
     by_day: dict[str, list[str]] = {}
     for item in pickups:
         day = (item.get("dato") or "")[:10]
@@ -141,14 +124,13 @@ def build_ics(pickups: list, cal_name: str) -> str:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(description=__doc__)
     g = ap.add_mutually_exclusive_group(required=True)
-    g.add_argument("--address", help="Street address, e.g. 'Sjøgata 103'")
-    g.add_argument("--id", help="Property (eiendom) GUID")
+    g.add_argument("--address", help="Your street address")
+    g.add_argument("--id", help="Property (eiendom) UUID")
     g.add_argument("--search", metavar="ADDRESS",
                    help="List matching properties and their ids, then exit")
-    ap.add_argument("--kommune", help="Disambiguate by municipality, e.g. 'Stad'")
+    ap.add_argument("--kommune", help="Disambiguate by municipality")
     ap.add_argument("--out", default="-", help="Output .ics path (default: stdout)")
     ap.add_argument("--name", default="NOMIL tømmekalender", help="Calendar name")
     ap.add_argument("--days-back", type=int, default=14)

@@ -1,4 +1,4 @@
-"""Calendar entity exposing NOMIL waste pickups as all-day events."""
+"""Calendar of upcoming NOMIL pickups."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the NOMIL calendar entity."""
+    """Set up the calendar entity."""
     coordinator: NomilCoordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities([NomilCalendar(coordinator, entry)])
 
@@ -36,7 +36,7 @@ def _parse_date(dato: str | None) -> date | None:
 
 
 def build_events(pickups: list[dict]) -> list[CalendarEvent]:
-    """Group same-day fractions into one all-day event, sorted by date."""
+    """Group same-day waste types into one all-day event, sorted by date."""
     by_day: dict[date, list[str]] = {}
     for item in pickups:
         day = _parse_date(item.get("dato"))
@@ -59,7 +59,7 @@ def build_events(pickups: list[dict]) -> list[CalendarEvent]:
 
 
 class NomilCalendar(CoordinatorEntity[NomilCoordinator], CalendarEntity):
-    """A calendar of upcoming waste pickups for one property."""
+    """Upcoming pickups for one property."""
 
     _attr_has_entity_name = True
     _attr_name = None
@@ -77,17 +77,17 @@ class NomilCalendar(CoordinatorEntity[NomilCoordinator], CalendarEntity):
 
     @property
     def event(self) -> CalendarEvent | None:
-        """The current or next pickup. Computed from cached data only."""
+        """Current or next pickup, from cached data."""
         today = dt_util.now().date()
         for ev in build_events(self.coordinator.data or []):
-            if ev.end > today:  # end is exclusive (the day after pickup)
+            if ev.end > today:  # end is exclusive (day after pickup)
                 return ev
         return None
 
     async def async_get_events(
         self, hass: HomeAssistant, start_date: datetime, end_date: datetime
     ) -> list[CalendarEvent]:
-        """Events in a range. Computed from cached data only, no API call."""
+        """Events in a range, from cached data (no API call)."""
         start = start_date.date() if isinstance(start_date, datetime) else start_date
         end = end_date.date() if isinstance(end_date, datetime) else end_date
         return [

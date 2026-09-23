@@ -1,4 +1,4 @@
-"""Sensors for NOMIL: next pickup overall and next date per waste fraction."""
+"""Sensors: next pickup overall, and next date per waste type."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the NOMIL sensors."""
+    """Set up the sensors."""
     coordinator: NomilCoordinator = hass.data[DOMAIN][entry.entry_id]
 
     entities: list[SensorEntity] = [NomilNextSensor(coordinator, entry)]
@@ -58,7 +58,7 @@ def _sorted_days(pickups: list[dict], fraction: str | None = None) -> list[date]
 
 
 class _NomilBaseSensor(CoordinatorEntity[NomilCoordinator], SensorEntity):
-    """Shared device wiring for NOMIL sensors."""
+    """Shared device wiring."""
 
     _attr_has_entity_name = True
     _attr_device_class = SensorDeviceClass.DATE
@@ -109,7 +109,7 @@ class NomilNextSensor(_NomilBaseSensor):
 
 
 class NomilFractionSensor(_NomilBaseSensor):
-    """Date of the next pickup for one specific waste fraction."""
+    """Date of the next pickup for one waste type."""
 
     def __init__(
         self, coordinator: NomilCoordinator, entry: ConfigEntry, fraction: str

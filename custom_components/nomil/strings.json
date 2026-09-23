@@ -11,7 +11,7 @@
       },
       "address": {
         "title": "Find your property",
-        "description": "Type your street address, for example \"Sjøgata 103\".",
+        "description": "Type your street address.",
         "data": { "address": "Address" }
       },
       "select": {

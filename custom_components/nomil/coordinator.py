@@ -1,4 +1,4 @@
-"""Data update coordinator for the NOMIL integration."""
+"""Coordinator that fetches one property's schedule on a slow poll."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class NomilCoordinator(DataUpdateCoordinator[list[dict]]):
-    """Fetch the pickup schedule for one property on a slow poll."""
+    """Fetches pickups for one property."""
 
     def __init__(
         self, hass: HomeAssistant, client: NomilApiClient, eiendom_id: str
@@ -43,6 +43,5 @@ class NomilCoordinator(DataUpdateCoordinator[list[dict]]):
                 today + timedelta(days=DEFAULT_LOOKAHEAD_DAYS),
             )
         except NomilApiError as err:
-            # On failure the coordinator keeps the previous data, so the
-            # calendar/sensors do not blank out on a transient hiccup.
+            # keep last-known-good data so the calendar doesn't blank on a hiccup
             raise UpdateFailed(str(err)) from err

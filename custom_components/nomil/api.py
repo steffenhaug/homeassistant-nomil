@@ -1,4 +1,4 @@
-"""Async client for the NOMIL (Norconsult Tømmeplan) backend."""
+"""Tiny async client for NOMIL's Tommeplan backend."""
 
 from __future__ import annotations
 
@@ -7,12 +7,7 @@ from datetime import date
 
 import aiohttp
 
-from .const import (
-    API_BASE,
-    APPLIKASJONS_ID,
-    OPPDRAGSGIVER_ID,
-    USER_AGENT,
-)
+from .const import API_BASE, APPLIKASJONS_ID, OPPDRAGSGIVER_ID, USER_AGENT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,15 +15,15 @@ _TIMEOUT = aiohttp.ClientTimeout(total=30)
 
 
 class NomilApiError(Exception):
-    """A request to the NOMIL backend failed."""
+    """A request to NOMIL failed."""
 
 
 class NomilAuthError(NomilApiError):
-    """Authentication with the NOMIL backend failed."""
+    """Login/auth with NOMIL failed."""
 
 
 class NomilApiClient:
-    """Minimal client: log in for a token, then read address/pickup data."""
+    """Logs in for a token, then reads address and pickup data."""
 
     def __init__(self, session: aiohttp.ClientSession) -> None:
         self._session = session
@@ -65,7 +60,7 @@ class NomilApiClient:
                     timeout=_TIMEOUT,
                 ) as resp:
                     if resp.status == 401 and attempt == 0:
-                        await self._login()
+                        await self._login()  # token expired, get a fresh one and retry
                         continue
                     resp.raise_for_status()
                     return await resp.json(content_type=None)
@@ -74,13 +69,13 @@ class NomilApiClient:
         raise NomilAuthError("Unauthorized even after re-login")
 
     async def search_addresses(self, address: str) -> list[dict]:
-        """Return properties whose address starts with the given string."""
+        """Properties whose address starts with the given string."""
         return await self._get("eiendommer", {"adresse": address})
 
     async def get_pickups(
         self, eiendom_id: str, date_from: date, date_to: date
     ) -> list[dict]:
-        """Return concrete pickup entries for a property in a date range."""
+        """Pickup entries for a property in a date range."""
         return await self._get(
             "tomminger",
             {
@@ -91,7 +86,7 @@ class NomilApiClient:
         )
 
     async def validate_id(self, eiendom_id: str) -> bool:
-        """Cheaply check that a property id is accepted by the API."""
+        """Cheap check that a property id is accepted."""
         today = date.today()
         await self.get_pickups(eiendom_id, today, today)
         return True

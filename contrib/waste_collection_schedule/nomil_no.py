@@ -1,3 +1,7 @@
+"""NOMIL source for the waste_collection_schedule framework."""
+
+from __future__ import annotations
+
 import datetime
 from html import unescape
 
@@ -9,31 +13,21 @@ from waste_collection_schedule.exceptions import (
 )
 
 TITLE = "NOMIL (Nordfjord Miljøverk)"
-DESCRIPTION = (
-    "Source for NOMIL / Nordfjord Miljøverk IKS waste collection, "
-    "covering Bremanger, Kinn, Stad, Gloppen and Stryn (Norway)."
-)
+DESCRIPTION = "NOMIL / Nordfjord Miljøverk IKS: Bremanger, Kinn, Stad, Gloppen, Stryn."
 URL = "https://www.nomil.no/"
 COUNTRY = "no"
 
-TEST_CASES = {
-    "Address in Stad": {"address": "Sjøgata 103"},
-    "Address + kommune": {"address": "Eidsgata 1", "kommune": "Stad"},
-    "Property id directly": {"id": "368ad825-6fc6-4bc5-aa6e-de88b59c00c6"},
-}
+# add your own TEST_CASES here if you want to run the framework's tests
 
-# The NOMIL "Tømmeplan" app talks to this Norconsult Digital backend. The
-# application id and oppdragsgiver (client) id are baked into the app and are
-# the same for every NOMIL user; they are not personal credentials.
+# app + tenant ids are baked into NOMIL's app, same for everyone, not secrets
 API_BASE = "https://tommeplan.nomil.no:9000/api/"
 APPLIKASJONS_ID = "380b0118-95ba-4c57-b53c-2f79c3922d65"
 OPPDRAGSGIVER_ID = "100"
 
-# Honest, self-identifying User-Agent: clearly marked unofficial so it is not
-# impersonating the real app. Add a contact (repo URL) if you publish one.
+# UA that identifies this as an unofficial client, not the real app
 USER_AGENT = "nomil-ha/1.0 (unofficial NoMil Tommeplan client for Home Assistant)"
 
-# Fraction name (as returned by the API) -> Material Design Icon.
+# waste type -> icon
 ICON_MAP = {
     "Restavfall": "mdi:trash-can",
     "Våtorganisk avfall": "mdi:leaf",
@@ -50,6 +44,8 @@ ICON_MAP = {
 
 
 class Source:
+    """Look up a property by address or id, return its pickups."""
+
     def __init__(self, address: str | None = None, kommune: str | None = None,
                  id: str | None = None):
         self._address = address.strip() if address else None
@@ -58,8 +54,7 @@ class Source:
         if not self._address and not self._id:
             raise SourceArgumentRequired(
                 "address",
-                "Provide either an 'address' (e.g. 'Sjøgata 103') or a "
-                "property 'id' (the eiendom GUID).",
+                "Provide either an 'address' or a property 'id' (the eiendom UUID).",
             )
 
     def _session(self) -> requests.Session:
@@ -88,20 +83,16 @@ class Source:
         if self._kommune:
             props = [p for p in props
                      if (p.get("kommune") or "").lower() == self._kommune]
-        # Prefer an exact (case-insensitive) address match when the user gave a
-        # house number; otherwise fall back to the first hit.
+        # prefer an exact match, else take the first hit
         wanted = self._address.lower()
-        exact = [p for p in props
-                 if (p.get("adresse") or "").lower() == wanted]
+        exact = [p for p in props if (p.get("adresse") or "").lower() == wanted]
         chosen = exact or props
         if not chosen:
-            suggestions = self._suggest(s)
             raise SourceArgumentNotFoundWithSuggestions(
-                "address", self._address, suggestions)
+                "address", self._address, self._suggest(s))
         return chosen[0]["id"]
 
     def _suggest(self, s: requests.Session) -> list[str]:
-        # Search on just the street part to offer nearby matches.
         street = self._address.rsplit(" ", 1)[0] if self._address else ""
         if not street:
             return []
