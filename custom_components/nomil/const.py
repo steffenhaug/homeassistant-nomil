@@ -21,7 +21,7 @@ UPDATE_INTERVAL_HOURS = 12
 CONF_EIENDOM_ID = "eiendom_id"
 CONF_ADDRESS = "address"
 
-DEFAULT_ICON = "mdi:trash-can"
+DEFAULT_ICON = "mdi:recycle"
 
 # waste type -> icon
 ICON_MAP: dict[str, str] = {
