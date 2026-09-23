@@ -1,0 +1,12 @@
+{
+  "domain": "nomil",
+  "name": "NOMIL Renovasjon",
+  "codeowners": ["@steffenhaug"],
+  "config_flow": true,
+  "documentation": "https://github.com/steffenhaug/homeassistant-nomil",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/steffenhaug/homeassistant-nomil/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

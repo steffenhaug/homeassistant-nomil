@@ -1,0 +1,36 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "NOMIL waste collection",
+        "description": "How do you want to find your property?",
+        "menu_options": {
+          "address": "Search by address",
+          "manual": "Enter property id (UUID)"
+        }
+      },
+      "address": {
+        "title": "Find your property",
+        "description": "Type your street address, for example \"Sjøgata 103\".",
+        "data": { "address": "Address" }
+      },
+      "select": {
+        "title": "Select your property",
+        "data": { "eiendom_id": "Property" }
+      },
+      "manual": {
+        "title": "Enter property id",
+        "description": "The eiendom UUID, if you already know it.",
+        "data": { "eiendom_id": "Property id (UUID)" }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not reach the NOMIL service. Try again.",
+      "no_results": "No properties matched that address.",
+      "invalid_id": "That property id was not accepted."
+    },
+    "abort": {
+      "already_configured": "This property is already added."
+    }
+  }
+}
