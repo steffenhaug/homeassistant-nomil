@@ -6,7 +6,7 @@ from datetime import date
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -21,21 +21,24 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the sensors."""
+    """Set up the sensors, adding a per-type sensor as each type is seen."""
     coordinator: NomilCoordinator = hass.data[DOMAIN][entry.entry_id]
+    known: set[str] = set()
 
-    entities: list[SensorEntity] = [NomilNextSensor(coordinator, entry)]
-    fractions = sorted(
-        {
-            (item.get("fraksjon") or "").strip()
-            for item in (coordinator.data or [])
-            if item.get("fraksjon")
-        }
-    )
-    entities.extend(
-        NomilFractionSensor(coordinator, entry, fraction) for fraction in fractions
-    )
-    async_add_entities(entities)
+    @callback
+    def _add_new_fractions() -> None:
+        new = []
+        for item in coordinator.data or []:
+            fraction = (item.get("fraksjon") or "").strip()
+            if fraction and fraction not in known:
+                known.add(fraction)
+                new.append(NomilFractionSensor(coordinator, entry, fraction))
+        if new:
+            async_add_entities(new)
+
+    async_add_entities([NomilNextSensor(coordinator, entry)])
+    _add_new_fractions()
+    entry.async_on_unload(coordinator.async_add_listener(_add_new_fractions))
 
 
 def _parse_date(dato: str | None) -> date | None:

@@ -12,7 +12,9 @@ OPPDRAGSGIVER_ID = "100"
 # UA that identifies this as an unofficial client, not the real app
 USER_AGENT = "nomil-ha/1.0 (unofficial NoMil Tommeplan client for Home Assistant)"
 
-DEFAULT_LOOKAHEAD_DAYS = 365
+# NOMIL only plans ~6 months out, so looking further is pointless. (Also the
+# API 500s when datoFra..datoTil spans more than 365 days.)
+DEFAULT_LOOKAHEAD_DAYS = 180
 DEFAULT_LOOKBACK_DAYS = 7
 
 # poll twice a day, don't hammer their server

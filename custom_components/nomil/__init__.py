@@ -18,7 +18,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up from a config entry."""
     client = NomilApiClient(async_get_clientsession(hass))
     coordinator = NomilCoordinator(hass, client, entry.data[CONF_EIENDOM_ID])
-    await coordinator.async_config_entry_first_refresh()
+    # don't raise on a failed first fetch: that makes HA retry setup in a loop,
+    # which hammers the API. Just set up; the coordinator retries on its own
+    # slow schedule and entities fill in once data arrives.
+    await coordinator.async_refresh()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
