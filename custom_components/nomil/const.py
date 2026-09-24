@@ -12,7 +12,7 @@ OPPDRAGSGIVER_ID = "100"
 # UA that identifies this as an unofficial client, not the real app
 USER_AGENT = "nomil-ha/1.0 (unofficial NoMil Tommeplan client for Home Assistant)"
 
-DEFAULT_LOOKAHEAD_DAYS = 120
+DEFAULT_LOOKAHEAD_DAYS = 365
 DEFAULT_LOOKBACK_DAYS = 7
 
 # poll twice a day, don't hammer their server

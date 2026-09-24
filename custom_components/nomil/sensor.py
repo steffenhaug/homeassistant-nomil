@@ -73,6 +73,11 @@ class _NomilBaseSensor(CoordinatorEntity[NomilCoordinator], SensorEntity):
             model="Tømmekalender",
         )
 
+    @property
+    def available(self) -> bool:
+        """Stay available on a failed refresh; keep the last schedule."""
+        return self.coordinator.data is not None
+
 
 class NomilNextSensor(_NomilBaseSensor):
     """Date of the next pickup of any kind."""
@@ -82,7 +87,6 @@ class NomilNextSensor(_NomilBaseSensor):
 
     def __init__(self, coordinator: NomilCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator, entry)
-        self._attr_name = "Next collection"
         self._attr_unique_id = f"{entry.unique_id}_next"
 
     @property

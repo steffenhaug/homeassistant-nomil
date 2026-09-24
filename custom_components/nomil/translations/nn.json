@@ -1,0 +1,41 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "NOMIL tømmekalender",
+        "description": "Korleis vil du finne eigedomen din?",
+        "menu_options": {
+          "address": "Søk etter adresse",
+          "manual": "Skriv inn eigedoms-id (UUID)"
+        }
+      },
+      "address": {
+        "title": "Finn eigedomen din",
+        "description": "Skriv inn gateadressa di.",
+        "data": { "address": "Adresse" }
+      },
+      "select": {
+        "title": "Vel eigedom",
+        "data": { "eiendom_id": "Eigedom" }
+      },
+      "manual": {
+        "title": "Skriv inn eigedoms-id",
+        "description": "Eigedoms-UUID-en, om du har han frå før.",
+        "data": { "eiendom_id": "Eigedoms-id (UUID)" }
+      }
+    },
+    "error": {
+      "cannot_connect": "Fekk ikkje kontakt med NOMIL. Prøv igjen.",
+      "no_results": "Ingen eigedomar passa til adressa.",
+      "invalid_id": "Eigedoms-id-en vart ikkje godteken."
+    },
+    "abort": {
+      "already_configured": "Denne eigedomen er allereie lagt til."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "next_collection": { "name": "Neste tømming" }
+    }
+  }
+}

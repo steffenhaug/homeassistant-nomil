@@ -76,6 +76,11 @@ class NomilCalendar(CoordinatorEntity[NomilCoordinator], CalendarEntity):
         )
 
     @property
+    def available(self) -> bool:
+        """Stay available on a failed refresh; keep the last schedule."""
+        return self.coordinator.data is not None
+
+    @property
     def event(self) -> CalendarEvent | None:
         """Current or next pickup, from cached data."""
         today = dt_util.now().date()

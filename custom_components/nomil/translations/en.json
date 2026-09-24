@@ -32,5 +32,10 @@
     "abort": {
       "already_configured": "This property is already added."
     }
+  },
+  "entity": {
+    "sensor": {
+      "next_collection": { "name": "Next collection" }
+    }
   }
 }
